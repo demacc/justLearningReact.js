@@ -5,9 +5,14 @@ function useFetch(url) {
   let [data, setData] = useState(null);
   let [loading, setLoading] = useState(false);
   let [error, setError] = useState(null);
+
   useEffect(() => {
+    let controller = new window.AbortController();
+    let signal = controller.signal;
     setLoading(true);
-    fetch(url)
+    fetch(url, {
+      signal,
+    })
       .then((res) => {
         if (!res.ok) {
           throw Error("something went wrong");
@@ -22,6 +27,11 @@ function useFetch(url) {
       .catch((e) => {
         setError(e.message);
       });
+    // clean up function
+    return () => {
+      console.log("clean up running");
+      controller.abort();
+    };
   }, [url]);
   //   output -> api's data
   return { data, loading, error };
